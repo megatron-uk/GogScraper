@@ -1,0 +1,11 @@
+# Needed to retrieve and parse HTML files from URLs
+requests
+
+# Parses HTML
+beautifulsoup4
+
+# To download youtube videos as linked on GOG.com product pages
+pytube
+
+# to download jpg and png images
+pycurl
