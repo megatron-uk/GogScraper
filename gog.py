@@ -310,7 +310,19 @@ class GOG():
 		# No class or id that uniquely identifies this block :(
 		
 		return 1
-		
+	
+	def get_title_from_fragment(self, text = ""):
+		""" Return game title """
+		name = None
+	
+		if self.data_block:
+			name = self.data_block['title']
+			print("- Found title %s" % name)
+			return name
+		else:
+			print("- Title extraction is only possible if we have extracted the GOG embedded json data!")
+			return False
+	
 	def get_cover(self):
 		""" Extract game cover art """
 		

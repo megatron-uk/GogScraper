@@ -181,6 +181,7 @@ if __name__ == "__main__":
 			data = {
 				'id' : idx,	
 				'url' : "",
+				'path' : g,
 				'name' : g_s,
 				'title' : g,
 				'description' : "",
@@ -202,7 +203,7 @@ if __name__ == "__main__":
 				data['has_xml'] = True
 
 			# Try to extract real game name
-			#data['name'] = p.get_gamename_from_fragment(result)
+			data['title'] = p.get_gamename_from_fragment(result)
 
 			# Try to extract URL to game page
 			data['url'] = p.get_href_from_fragment(result)
@@ -217,10 +218,10 @@ if __name__ == "__main__":
 		print("%2s | %-70s | %s" % ("ID", "Name", "URL"))
 		print("%2s | %-70s | %s" % ("--", "-----", "-----"))
 		for game in game_matches:
-			print("%2d | %-70s | %s" % (game['id'], game['name'], game['url']))
+			print("%2d | %-70s | %s" % (game['id'], game['title'], game['url']))
 			
 		# If we have only one match, and it is an exact match, then continue
-		if (len(game_matches) == 1) and (game_matches[0]['name'].upper() == g_s.upper()):
+		if (len(game_matches) == 1) and (game_matches[0]['title'].upper() == g_s.upper()):
 			continue_id = game_matches[0]['id']
 			game = game_matches[0]
 			print("")
@@ -259,7 +260,7 @@ if __name__ == "__main__":
 				
 				# Basic metadata
 				if MEDIA['data']:
-					game['title'] = p.get_gamename_from_fragment(game_html)
+					game['realname'] = p.get_title_from_fragment(game_html)
 					game['description'] = p.get_description_from_fragment(game_html)
 					game['developer'] = p.get_developer_from_fragment(game_html)
 					game['publisher'] = p.get_publisher_from_fragment(game_html)
@@ -336,7 +337,7 @@ if __name__ == "__main__":
 					if (game['has_xml']):
 						# Find and edit existing entry
 						print("- Updating existing gamelist.xml entry")
-						gl.update_game(game)
+						gl.update_game(game, enable_overwrite)
 					else:
 						# Add new entry
 						print("- Creating new gamelist.xml entry")

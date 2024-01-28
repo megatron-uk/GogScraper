@@ -6,6 +6,3 @@ beautifulsoup4
 
 # To download youtube videos as linked on GOG.com product pages
 pytube
-
-# to download jpg and png images
-pycurl
