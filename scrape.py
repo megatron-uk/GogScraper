@@ -183,7 +183,6 @@ if __name__ == "__main__":
 				'url' : "",
 				'path' : g,
 				'name' : g_s,
-				'title' : g,
 				'description' : "",
 				'date' : "",
 				'developer' : "",
@@ -203,7 +202,10 @@ if __name__ == "__main__":
 				data['has_xml'] = True
 
 			# Try to extract real game name
-			data['title'] = p.get_gamename_from_fragment(result)
+			# and use it to replace the stripped filename
+			n = p.get_gamename_from_fragment(result)
+			if n:
+				data['name'] = n
 
 			# Try to extract URL to game page
 			data['url'] = p.get_href_from_fragment(result)
@@ -218,10 +220,10 @@ if __name__ == "__main__":
 		print("%2s | %-70s | %s" % ("ID", "Name", "URL"))
 		print("%2s | %-70s | %s" % ("--", "-----", "-----"))
 		for game in game_matches:
-			print("%2d | %-70s | %s" % (game['id'], game['title'], game['url']))
+			print("%2d | %-70s | %s" % (game['id'], game['name'], game['url']))
 			
 		# If we have only one match, and it is an exact match, then continue
-		if (len(game_matches) == 1) and (game_matches[0]['title'].upper() == g_s.upper()):
+		if (len(game_matches) == 1) and (game_matches[0]['name'].upper() == g_s.upper()):
 			continue_id = game_matches[0]['id']
 			game = game_matches[0]
 			print("")
@@ -331,17 +333,17 @@ if __name__ == "__main__":
 			if (enable_data):
 				print("")
 				print("Updating gamelist.xml metadata")
-				if (game['has_xml']) and (enable_overwrite is False):
-					print("- Error, cannot update - entry already exists (Hint: -f to overwrite)")
-				else:
-					if (game['has_xml']):
-						# Find and edit existing entry
+				if (game['has_xml']):
+					# Find and edit existing entry
+					if (enable_overwrite):
 						print("- Updating existing gamelist.xml entry")
-						gl.update_game(game, enable_overwrite)
 					else:
-						# Add new entry
-						print("- Creating new gamelist.xml entry")
-						gl.add_game(game)
+						print("- Updating existing gamelist.xml entry (missing fields only)")
+					gl.update_game(game, enable_overwrite)
+				else:
+					# Add new entry
+					print("- Creating new gamelist.xml entry")
+					gl.add_game(game, enable_overwrite)
 					
 				# Update the list of games with XML, in case we find a match in any
 				# subsequent loops

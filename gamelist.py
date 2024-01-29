@@ -76,6 +76,8 @@ class Gamelist():
 			else:
 				self.init_xml()
 			
+			updated = False
+			
 			# Open xml
 			tree = etree.parse(self.xml_path)
 			root = tree.getroot()
@@ -87,63 +89,71 @@ class Gamelist():
 			path_el.text = game['path']
 			game_element.append(path_el)
 			
-			if game['realname']:
-				name_el = etree.Element('name')
-				name_el.text = game['realname']
-				game_element.append(name_el)
-			
-				if game['description']:
-					desc_el = etree.Element('description')
-					desc_el.text = game['description']
-					game_element.append(desc_el)
-				
-				if game['rating']:
-					rating_el = etree.Element('rating')
-					rating_el.text = str(game['rating'])
-					game_element.append(rating_el)
-				
-				if game['date']:
-					releasedate_el = etree.Element('date')
-					releasedate_el.text = game['date']
-					game_element.append(releasedate_el)
-				
-				if game['developer']:
-					developer_el = etree.Element('developer')
-					developer_el.text = game['developer']
-					game_element.append(developer_el)
-				
-				if game['publisher']:
-					publisher_el = etree.Element('publisher')
-					publisher_el.text = game['publisher']
-					game_element.append(publisher_el)
-				
-				if game['genre']:
-					genre_el = etree.Element('genre')
-					genre_el.text = game['genre']
-					game_element.append(genre_el)
-				
-				if game['players']:
-					players_el = etree.Element('players')
-					players_el.text = str(game['players'])
-					game_element.append(players_el)
+			process_fields = ['name', 'description', 'rating', 'date', 'developer', 'publisher', 'genre', 'players']
+			for k in process_fields:
+				if game[k]:
+					el = etree.Element(k)
+					el.text = game[k]
+					game_element.append(el)
+					updated = True
 				
 			# Add new entry
 			root.append(game_element)
 			
 			# Close xml
-			tree_string = etree.tostring(root, encoding="unicode")
-			reparsed = minidom.parseString(tree_string)
-			f = open(self.xml_path, "w")
-			f.write(tree_string)
-			f.write("\n")
-			f.close()
+			if updated:
+				tree_string = etree.tostring(root, encoding="unicode")
+				reparsed = minidom.parseString(tree_string)
+				f = open(self.xml_path, "w")
+				f.write(tree_string)
+				f.write("\n")
+				f.close()
 	
 	def update_game(self, game, enable_overwrite = False):
 		""" Amend an existing game in the xml file """
 		
 		if self.xml_path:
 			# Open xml
+			tree = etree.parse(self.xml_path)
+			root = tree.getroot()
+			
+			updated = False
+			
 			# Find existing entry
-			# Change attributes
+			for game_element in root.findall('game'):	
+				game_path = game_element.find('path').text
+				if (game_path == game['path']):
+					# Found the matching game
+				
+					# Change attributes
+					if enable_overwrite:
+						# Update all fields
+						process_fields = ['name', 'description', 'rating', 'date', 'developer', 'publisher', 'genre', 'players']
+					else:
+						# Find only missing/empty fields
+						process_fields = []
+						for f in ['name', 'description', 'rating', 'date', 'developer', 'publisher', 'genre', 'players']:
+							element_field = game_element.find(f)
+							if (element_field is None):
+								process_fields.append(f)
+								
+					# Update any fields
+					if len(process_fields) > 0:
+						print("- Processing: %s" % process_fields)
+						for k in process_fields:
+							if game[k]:
+								el = etree.Element(k)
+								el.text = str(game[k])
+								game_element.append(el)
+								updated = True
+					else:
+						print("- No additional missing fields found")
+						
 			# Close xml
-			pass
+			if updated:
+				tree_string = etree.tostring(root, encoding="unicode")
+				reparsed = minidom.parseString(tree_string)
+				f = open(self.xml_path, "w")
+				f.write(tree_string)
+				f.write("\n")
+				f.close()
