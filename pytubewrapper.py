@@ -27,7 +27,7 @@ class PTWrapper():
 				try:
 					print("- Downloading %s stream" % res)
 					path = os.path.join(download_path, "videos")
-					filename = game['name'] + ".mp4"
+					filename = game['filename'] + ".mp4"
 					if (os.path.isfile(os.path.join(path, filename))) and (enable_overwrite is False):
 						print("- ... already exists, skipping (Hint: -f to overwrite)")
 						return False

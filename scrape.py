@@ -63,7 +63,7 @@ def download_or_overwrite_art(game, download_path, art_type, overwrite):
 	if art_type == "title":
 		path = os.path.join(download_path, "titlescreens")
 		
-	filename = game['name'] + ".jpg"
+	filename = game['filename'] + ".jpg"
 		
 	if game[art_type]:
 		print("- Downloading %s" % art_type)
@@ -199,6 +199,7 @@ if __name__ == "__main__":
 				'url' : "",
 				'path' : g,
 				'name' : g_s,
+				'filename' : g_s,
 				'description' : "",
 				'date' : "",
 				'developer' : "",

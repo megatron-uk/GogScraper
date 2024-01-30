@@ -28,8 +28,8 @@ class Gamelist():
 			tree_string = etree.tostring(tree, 'utf-8')
 			reparsed = minidom.parseString(tree_string)
 			f = open(self.xml_path, "w")
+			f.write('<?xml version="1.0"?>\n')			
 			f.write(reparsed.toprettyxml(indent="   "))
-			f.write("\n")
 			f.close()
 			self.is_parsed = True
 		except Exception as e:
@@ -63,6 +63,7 @@ class Gamelist():
 					games.append(filename)
 			except Exception as e:
 				print("- No entries found, gamelist.xml is possibly blank")
+				print(e)
 		
 		return games
 		
