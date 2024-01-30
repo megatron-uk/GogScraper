@@ -6,3 +6,7 @@ beautifulsoup4
 
 # To download youtube videos as linked on GOG.com product pages
 pytube
+
+# Text searching
+fuzzywuzzy
+python-Levenshtein

@@ -5,6 +5,7 @@ import json
 import os
 import re
 import requests
+from fuzzywuzzy import fuzz
 
 # Base GOG URL
 STEAM_URL = "https://store.steampowered.com/app/"
@@ -91,6 +92,10 @@ class Steam():
 				for app in self.app_ids:
 					if name.upper() in app['name'].upper():
 						search_results.append(app)
+					else:
+						r = fuzz.token_sort_ratio(name, app['name'])
+						if r > 75:
+							search_results.append(app)
 					
 				print("- Found [%d]" % len(search_results))
 		except Exception as e:
