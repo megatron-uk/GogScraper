@@ -285,14 +285,16 @@ if __name__ == "__main__":
 				# Basic metadata
 				if MEDIA['data']:
 					game['realname'] = p.get_title_from_fragment(game_html)
-					game['description'] = p.get_description_from_fragment(game_html)
+					game['desc'] = p.get_description_from_fragment(game_html)
 					game['developer'] = p.get_developer_from_fragment(game_html)
 					game['publisher'] = p.get_publisher_from_fragment(game_html)
 					game['genre'] = p.get_genre_from_fragment(game_html)
 					game['rating'] = p.get_rating_from_fragment(game_html)
 					game['date'] = p.get_date_from_fragment(game_html)
 					game['players'] = p.get_players_from_fragment(game_html)
-				
+					for k in ['desc', 'developer', 'publisher', 'name', 'realname']:
+						if game[k]:
+							game[k] = str(game[k]).encode("ascii", "replace").decode(encoding='ascii')
 				# Video
 				if MEDIA['video']:
 					if enable_video:

@@ -289,6 +289,8 @@ class GOG():
 		try:
 			if self.data_block:
 				date = self.data_block['globalReleaseDate']
+				date = date.replace("-", "")
+				date = date.replace(":", "")
 				print("- Found release date (data block) [%s]" % date)
 				return date
 			else:
@@ -296,6 +298,8 @@ class GOG():
 				for f in fragment_results:
 					date = f.split('"')
 					date = date[2]
+					date = date.replace("-", "")
+					date = date.replace(":", "")
 					print("- Found release date (regex) [%s]" % date)
 					return date
 		except Exception as e:
@@ -391,7 +395,7 @@ class GOG():
 		if len(youtube_videos) > 0:
 			return youtube_videos[0]
 			
-	def download_video(self, game = None, download_path = "", enable_overwrite = False):
+	def download_video(self, game = None, download_path = "", art_type = "video", enable_overwrite = False):
 		""" Download a video """
 		
 		ptw = PTWrapper()

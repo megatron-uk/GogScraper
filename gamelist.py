@@ -24,11 +24,10 @@ class Gamelist():
 	def init_xml(self):
 		try:
 			print("- Creating new gamelist.xml %s" % self.xml_path)
-			tree = etree.Element('GameList')
+			tree = etree.Element('gameList')
 			tree_string = etree.tostring(tree, 'utf-8')
 			reparsed = minidom.parseString(tree_string)
-			f = open(self.xml_path, "w")
-			f.write('<?xml version="1.0"?>\n')			
+			f = open(self.xml_path, "w")			
 			f.write(reparsed.toprettyxml(indent="   "))
 			f.close()
 			self.is_parsed = True
@@ -56,7 +55,7 @@ class Gamelist():
 
 		if self.xml_path:
 			try:
-				tree = etree.parse(self.xml_path)
+				tree = etree.parse(self.xml_path, parser = etree.XMLParser(encoding = 'utf-8'))
 				root = tree.getroot()
 				for pathname in root.iter('path'):
 					filename = pathname.text.replace('./', '')
@@ -87,10 +86,10 @@ class Gamelist():
 			game_element = etree.Element('game')
 			
 			path_el = etree.Element('path')
-			path_el.text = game['path']
+			path_el.text = "./" + game['path']
 			game_element.append(path_el)
 			
-			process_fields = ['name', 'description', 'rating', 'date', 'developer', 'publisher', 'genre', 'players']
+			process_fields = ['name', 'desc', 'rating', 'date', 'developer', 'publisher', 'genre', 'players']
 			for k in process_fields:
 				if game[k]:
 					el = etree.Element(k)
@@ -129,11 +128,11 @@ class Gamelist():
 					# Change attributes
 					if enable_overwrite:
 						# Update all fields
-						process_fields = ['name', 'description', 'rating', 'date', 'developer', 'publisher', 'genre', 'players']
+						process_fields = ['name', 'desc', 'rating', 'date', 'developer', 'publisher', 'genre', 'players']
 					else:
 						# Find only missing/empty fields
 						process_fields = []
-						for f in ['name', 'description', 'rating', 'date', 'developer', 'publisher', 'genre', 'players']:
+						for f in ['name', 'desc', 'rating', 'date', 'developer', 'publisher', 'genre', 'players']:
 							element_field = game_element.find(f)
 							if (element_field is None):
 								process_fields.append(f)
