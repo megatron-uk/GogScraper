@@ -5,6 +5,9 @@ import json
 import re
 import requests
 
+
+from pytubewrapper import PTWrapper
+
 # Base GOG URL
 GOG_URL = "https://www.gog.com"
 
@@ -82,7 +85,7 @@ class GOG():
 			
 		return search_results
 	
-	def get_game(self, game_url = ""):
+	def get_game(self, game = None, game_url = ""):
 		""" Get a single GOG.com game page """
 		
 		html = ""
@@ -132,7 +135,7 @@ class GOG():
 			
 		return card_json
 	
-	def get_href_from_fragment(self, text = ""):
+	def get_href_from_fragment(self, text = "", url_type = None):
 		""" Return an href value from a given HTML fragment """
 		href = None
 	
@@ -201,7 +204,7 @@ class GOG():
 			fragment_results = fragment.find_all(href=re.compile("^/games\?developers\="))
 			for f in fragment_results:
 				developer = f.text
-				print("- Found developer")
+				print("- Found developer [%s]" % developer)
 				return developer
 		except Exception as e:
 			print("- Unable to extract game developer from fragment")
@@ -223,7 +226,7 @@ class GOG():
 			fragment_results = fragment.find_all(href=re.compile("^/games\?publishers\="))
 			for f in fragment_results:
 				publisher = f.text
-				print("- Found publisher")
+				print("- Found publisher [%s]" % publisher)
 				return publisher
 		except Exception as e:
 			print("- Unable to extract game publisher from fragment")
@@ -248,7 +251,7 @@ class GOG():
 				genre = f.split("CAT: ")
 				genre = genre[1].split("'")
 				genre = genre[0]
-				print("- Found genre")
+				print("- Found genre [%s]" % genre)
 				return genre
 		except Exception as e:
 			print("- Unable to extract game genre from fragment")
@@ -271,7 +274,7 @@ class GOG():
 				rating = rating[1].split('"')
 				rating = float(rating[1])
 				rating = rating / 5
-				print("- Found rating")
+				print("- Found rating [%s]" % rating)
 				return rating
 		except Exception as e:
 			print("- Unable to extract game rating from fragment")
@@ -286,14 +289,14 @@ class GOG():
 		try:
 			if self.data_block:
 				date = self.data_block['globalReleaseDate']
-				print("- Found release date (data block)")
+				print("- Found release date (data block) [%s]" % date)
 				return date
 			else:
 				fragment_results = re.findall("globalReleaseDate\":\"....-..-..T..:..:..", text)
 				for f in fragment_results:
 					date = f.split('"')
 					date = date[2]
-					print("- Found release date (regex)")
+					print("- Found release date (regex) [%s]" % date)
 					return date
 		except Exception as e:
 			print("- Unable to extract game release date from fragment")
@@ -387,4 +390,9 @@ class GOG():
 	
 		if len(youtube_videos) > 0:
 			return youtube_videos[0]
+			
+	def download_video(self, game = None, download_path = "", enable_overwrite = False):
+		""" Download a video """
 		
+		ptw = PTWrapper()
+		ptw.download(game, download_path, "video", enable_overwrite)

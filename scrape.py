@@ -15,13 +15,13 @@ import requests
 import sys
 
 # Scraper types
-from gog import GOG as Provider
-from gog import MEDIA
+from gog import GOG as GProvider
+from steam import Steam as SProvider
+from gog import MEDIA as GMEDIA
+from steam import MEDIA as SMEDIA
 
 # Gamelist.xml helper
 from gamelist import Gamelist
-
-from pytubewrapper import PTWrapper
 
 def get_roms_list(path = ""):
 	""" Get the list of roms/files in a given directory """
@@ -123,27 +123,42 @@ if __name__ == "__main__":
 	# Path to downloaded media directory
 	parser.add_argument('--media', dest='download_path', action='store', required=True, help='Set the path to store downloaded media')
 	
+	parser.add_argument('--provider', dest='provider', action='store', required=True, help='Set the data provider to "gog" or "steam"')
+	
 	args = parser.parse_args()
 	args_dict = vars(args)
 	enable_data = args_dict['enable_data']
 	enable_art = args_dict['enable_art']
 	enable_video = args_dict['enable_video']
 	enable_overwrite = args_dict['enable_overwrite']
+	provider = args_dict['provider']
 	rom_path = args_dict['rom_path']
 	xml_path = args_dict['xml_path']
 	download_path = args_dict['download_path']
 	
 	print("")
 	print("Selected options: [data: %s] [art: %s] [video: %s] [overwrite: %s]" % (enable_data, enable_art, enable_video, enable_overwrite))
+	print("Data provider: %s" % provider)
 	print("ROM path: %s" % rom_path)
 	print("XML path: %s" % xml_path)
 	print("Media path: %s" % download_path)
 	
-	p = Provider(debug = False)
+	if provider.upper() not in ["GOG", "STEAM"]:
+		exit_abnormal(1, "You must set the provider to be either 'gog' or 'steam'")
+	
+	if provider.upper() == "GOG":
+		p = GProvider(debug = False)
+		if p is False:
+			exit_abnormal(1, "The GOG.com provider could not be initialised.")
+		MEDIA = GMEDIA
+	if provider.upper() == "STEAM":
+		p = SProvider(debug = False)
+		if p is False:
+			exit_abnormal(1, "The Steam provider could not be initialised.")
+		MEDIA = SMEDIA
 	
 	# Get a list of all games/roms in the rom folder
 	games_list = get_roms_list(rom_path)
-	#games_stripped_list = get_roms_stripped_list(games_list) 
 	
 	# Get a list of all games/roms in the xml file
 	print("")
@@ -180,6 +195,7 @@ if __name__ == "__main__":
 			
 			data = {
 				'id' : idx,	
+				'provider_id' : False,
 				'url' : "",
 				'path' : g,
 				'name' : g_s,
@@ -197,6 +213,10 @@ if __name__ == "__main__":
 				'has_xml' : False,
 			}
 
+			# Store the steam appid
+			if provider.upper() == "STEAM":
+				data['provider_id'] = result['appid']
+
 			# Does this title already have a gamelist.xml entry?
 			if g in games_xml_list:
 				data['has_xml'] = True
@@ -208,7 +228,7 @@ if __name__ == "__main__":
 				data['name'] = n
 
 			# Try to extract URL to game page
-			data['url'] = p.get_href_from_fragment(result)
+			data['url'] = p.get_href_from_fragment(result, url_type = "game")
 
 			# Add this game entry
 			game_matches.append(data)
@@ -242,10 +262,11 @@ if __name__ == "__main__":
 			# Make sure this is the ID of a game we found
 			found = False
 			game = False
-			for g in game_matches:
-				if int(i) == g['id']:
-					found = True
-					game = g
+			if i:
+				for g in game_matches:
+					if int(i) == g['id']:
+						found = True
+						game = g
 			if game is False:
 				print("")
 				print("Sorry, that is not a valid found game ID")
@@ -253,7 +274,7 @@ if __name__ == "__main__":
 		if game:
 			print("")
 			print("Continuing with ID %s, %s" % (game['id'], game['name']))
-			game_html = p.get_game(game_url = game['url'])
+			game_html = p.get_game(game, game_url = game['url'])
 			
 			if game_html:
 				
@@ -326,8 +347,7 @@ if __name__ == "__main__":
 			if (enable_video):
 				print("")
 				print("Downloading external video assets")
-				ptw = PTWrapper()
-				ptw.download(game, download_path, "video", enable_overwrite)
+				p.download_video(game, download_path, "video", enable_overwrite)
 				
 			# Update xml metadata
 			if (enable_data):

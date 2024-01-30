@@ -66,7 +66,7 @@ class Gamelist():
 		
 		return games
 		
-	def add_game(self, game):
+	def add_game(self, game, enable_overwrite = False):
 		""" Add a game to the xml file """
 		
 		if self.xml_path:
@@ -93,7 +93,7 @@ class Gamelist():
 			for k in process_fields:
 				if game[k]:
 					el = etree.Element(k)
-					el.text = game[k]
+					el.text = str(game[k])
 					game_element.append(el)
 					updated = True
 				
