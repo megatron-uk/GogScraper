@@ -294,7 +294,7 @@ if __name__ == "__main__":
 					game['players'] = p.get_players_from_fragment(game_html)
 					for k in ['desc', 'developer', 'publisher', 'name', 'realname']:
 						if game[k]:
-							game[k] = str(game[k]).encode("ascii", "replace").decode(encoding='ascii')
+							game[k] = str(game[k]).encode(encoding="ascii", errors="replace").decode(encoding='ascii', errors='replace')
 				# Video
 				if MEDIA['video']:
 					if enable_video:
