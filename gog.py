@@ -291,6 +291,8 @@ class GOG():
 				date = self.data_block['globalReleaseDate']
 				date = date.replace("-", "")
 				date = date.replace(":", "")
+				if '+' in date:
+					date = date.split('+')[0]
 				print("- Found release date (data block) [%s]" % date)
 				return date
 			else:
@@ -300,6 +302,8 @@ class GOG():
 					date = date[2]
 					date = date.replace("-", "")
 					date = date.replace(":", "")
+					if '+' in date:
+						date = date.split('+')[0]
 					print("- Found release date (regex) [%s]" % date)
 					return date
 		except Exception as e:

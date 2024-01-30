@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from bs4 import BeautifulSoup
 import datetime
 import json
 import os
@@ -19,6 +20,8 @@ SEARCH_SUFFIX = ""
 
 # Search results are tagged with this string under the 'seleniumId' tag
 GAME_HTML_ELEMENT = "productTile"
+
+cookies = { 'birthtime': '470682001', 'lastagecheck' : '1-0-1985', 'mature_content': '1' }
 
 # Media folder names as used by EmulationStation
 # and their availability from within GOG.com
@@ -68,7 +71,7 @@ class Steam():
 		try:
 			print("")
 			print("Retriving Steam App entries from steampowered.com")
-			r = requests.get(SEARCH_URL)
+			r = requests.get(SEARCH_URL, cookies = cookies)
 			if (r.status_code != 200):
 				print("- Skipped, no data returned %s" % (r.status_code))
 			else:
@@ -114,16 +117,18 @@ class Steam():
 			print("")
 			print("Retrieving game data from Steam for %s:" % game['provider_id'])
 			game_url = STEAM_DETAILS_URL + "?appids=" + app_id
-			r = requests.get(game_url)
+			r = requests.get(game_url, cookies=cookies)
 			if (r.status_code != 200):
 				print("- Skipped %s, query returned %s" % (game_url, r.status_code))
 			else:
 				html = r.text
 				print("- Returned %s bytes" % len(html))
 				game_data = json.loads(html)
-				self.data_block = game_data[app_id]['data']
-				return self.data_block
-			
+				if str(app_id) in game_data.keys():
+					if 'success' in game_data[str(app_id)].keys():
+						if game_data[str(app_id)]['success'] is True:
+							self.data_block = game_data[str(app_id)]['data']
+							return self.data_block			
 		except Exception as e:
 			print("- Error make HTTP game request to %s" % game_url)
 			print(e)
@@ -133,7 +138,7 @@ class Steam():
 	
 	def get_data(self, game_url = "", text = ""):
 		""" This is a no-op for steam data """
-		pass
+		return self.data_block
 	
 	def get_href_from_fragment(self, app = None, url_type = None):
 		""" Return an href value from a given HTML fragment """
@@ -157,7 +162,8 @@ class Steam():
 	
 		try:
 			if 'detailed_description' in text.keys():
-				return text['detailed_description']
+				soup = BeautifulSoup(text['detailed_description'])
+				return soup.get_text()
 				print("- Found description")
 		except Exception as e:
 			print("- Unable to extract game description from fragment")

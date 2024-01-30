@@ -200,8 +200,8 @@ if __name__ == "__main__":
 				'path' : g,
 				'name' : g_s,
 				'filename' : g_s,
-				'description' : "",
-				'date' : "",
+				'desc' : "",
+				'releasedate' : "",
 				'developer' : "",
 				'publisher' : "",
 				'genre' : "",
@@ -236,13 +236,13 @@ if __name__ == "__main__":
 			
 			# Increment result ID
 			idx += 1
-			
+		
 		print("")
 		print("%2s | %-70s | %s" % ("ID", "Name", "URL"))
 		print("%2s | %-70s | %s" % ("--", "-----", "-----"))
 		for game in game_matches:
 			print("%2d | %-70s | %s" % (game['id'], game['name'], game['url']))
-			
+		
 		# If we have only one match, and it is an exact match, then continue
 		if (len(game_matches) == 1) and (game_matches[0]['name'].upper() == g_s.upper()):
 			continue_id = game_matches[0]['id']
@@ -252,8 +252,8 @@ if __name__ == "__main__":
 		else:
 			game = False
 			continue_id = False
-			
-		if continue_id is False:
+				
+		if (continue_id is False) and (len(game_matches) > 0):
 			print("")
 			print("Enter an ID to use the metadata and media from that title.")
 			print("(Hint: Control+Click on the URL to open the page in your browser)")
@@ -264,13 +264,19 @@ if __name__ == "__main__":
 			found = False
 			game = False
 			if i:
+				try:
+					i = int(i)
+				except Exception as e:
+					print("Not a valid input")
+					print(e)
+					i = -1
 				for g in game_matches:
-					if int(i) == g['id']:
+					if i == g['id']:
 						found = True
-						game = g
-			if game is False:
-				print("")
-				print("Sorry, that is not a valid found game ID")
+						game = g	
+				if game is False:
+					print("")
+					print("Sorry, that is not a valid found game ID")
 				
 		if game:
 			print("")
@@ -280,94 +286,98 @@ if __name__ == "__main__":
 			if game_html:
 				
 				# Update
-				p.get_data(game['url'], game_html)
+				has_data = p.get_data(game['url'], game_html)
 				
-				# Basic metadata
-				if MEDIA['data']:
-					game['realname'] = p.get_title_from_fragment(game_html)
-					game['desc'] = p.get_description_from_fragment(game_html)
-					game['developer'] = p.get_developer_from_fragment(game_html)
-					game['publisher'] = p.get_publisher_from_fragment(game_html)
-					game['genre'] = p.get_genre_from_fragment(game_html)
-					game['rating'] = p.get_rating_from_fragment(game_html)
-					game['date'] = p.get_date_from_fragment(game_html)
-					game['players'] = p.get_players_from_fragment(game_html)
-					for k in ['desc', 'developer', 'publisher', 'name', 'realname']:
-						if game[k]:
-							game[k] = str(game[k]).encode(encoding="ascii", errors="replace").decode(encoding='ascii', errors='replace')
-				# Video
-				if MEDIA['video']:
-					if enable_video:
-						game['video'] = p.get_video()
-					else:
-						print("- Video downloads are disabled (Hint: -v to retrieve video)")
-				else:
-					print("- Provider does not support video")
-				
-				# Title screen
-				if MEDIA['title']:
-					if enable_art:
-						game['title'] = p.get_title()
-					else:
-						print("- Title artwork downloading is disabled (Hint: -a to retrieve artwork)")
-				else:
-					print("- Provider does not support title screens")
-				
-				# Screenshot
-				if MEDIA['screens']:
-					if enable_art:
-						game['screens'] = p.get_screen()
-					else:
-						print("- Screenshot downloading is disabled (Hint: -a to retrieve artwork)")
-				else:
-					print("- Provider does not support screenshots")
-				
-				# Marquee
-				if MEDIA['marquee']:
-					if enable_art:
-						game['marquee'] = p.get_marquee()
-					else:
-						print("- Marquee artwork downloading is disabled (Hint: -a to retrieve artwork)")
-				else:
-					print("- Provider does not support marquee images")
-				
-				# Cover art
-				if MEDIA['cover']:
-					if enable_art:
-						game['cover'] = p.get_cover()
-					else:
-						print("- Cover artwork downloading is disabled (Hint: -a to retrieve artwork)")
-				else:
-					print("- Provider does not support cover or box art")
-			
-			# Download external media
-			if (enable_art):
-				print("")
-				print("Downloading external art assets")		
-				for art_type in ["screens", "title", "marquee", "cover"]:
-					download_or_overwrite_art(game, download_path, art_type, enable_overwrite)
+				if has_data:
 
-			if (enable_video):
-				print("")
-				print("Downloading external video assets")
-				p.download_video(game, download_path, "video", enable_overwrite)
-				
-			# Update xml metadata
-			if (enable_data):
-				print("")
-				print("Updating gamelist.xml metadata")
-				if (game['has_xml']):
-					# Find and edit existing entry
-					if (enable_overwrite):
-						print("- Updating existing gamelist.xml entry")
+					# Basic metadata
+					if MEDIA['data']:
+						game['realname'] = p.get_title_from_fragment(game_html)
+						game['desc'] = p.get_description_from_fragment(game_html)
+						game['developer'] = p.get_developer_from_fragment(game_html)
+						game['publisher'] = p.get_publisher_from_fragment(game_html)
+						game['genre'] = p.get_genre_from_fragment(game_html)
+						game['rating'] = p.get_rating_from_fragment(game_html)
+						game['releasedate'] = p.get_date_from_fragment(game_html)
+						game['players'] = p.get_players_from_fragment(game_html)
+						for k in ['desc', 'developer', 'publisher', 'name', 'realname']:
+							if game[k]:
+								game[k] = str(game[k]).encode(encoding="ascii", errors="replace").decode(encoding='ascii', errors='replace')
+					# Video
+					if MEDIA['video']:
+						if enable_video:
+							game['video'] = p.get_video()
+						else:
+							print("- Video downloads are disabled (Hint: -v to retrieve video)")
 					else:
-						print("- Updating existing gamelist.xml entry (missing fields only)")
-					gl.update_game(game, enable_overwrite)
-				else:
-					# Add new entry
-					print("- Creating new gamelist.xml entry")
-					gl.add_game(game, enable_overwrite)
+						print("- Provider does not support video")
+				
+					# Title screen
+					if MEDIA['title']:
+						if enable_art:
+							game['title'] = p.get_title()
+						else:
+							print("- Title artwork downloading is disabled (Hint: -a to retrieve artwork)")
+					else:
+						print("- Provider does not support title screens")
+				
+					# Screenshot
+					if MEDIA['screens']:
+						if enable_art:
+							game['screens'] = p.get_screen()
+						else:
+							print("- Screenshot downloading is disabled (Hint: -a to retrieve artwork)")
+					else:
+						print("- Provider does not support screenshots")
+				
+					# Marquee
+					if MEDIA['marquee']:
+						if enable_art:
+							game['marquee'] = p.get_marquee()
+						else:
+							print("- Marquee artwork downloading is disabled (Hint: -a to retrieve artwork)")
+					else:
+						print("- Provider does not support marquee images")
+				
+					# Cover art
+					if MEDIA['cover']:
+						if enable_art:
+							game['cover'] = p.get_cover()
+						else:
+							print("- Cover artwork downloading is disabled (Hint: -a to retrieve artwork)")
+					else:
+						print("- Provider does not support cover or box art")
+			
+					# Download external media
+					if (enable_art):
+						print("")
+						print("Downloading external art assets")		
+						for art_type in ["screens", "title", "marquee", "cover"]:
+							download_or_overwrite_art(game, download_path, art_type, enable_overwrite)
+
+					if (enable_video):
+						print("")
+						print("Downloading external video assets")
+						p.download_video(game, download_path, "video", enable_overwrite)
 					
-				# Update the list of games with XML, in case we find a match in any
-				# subsequent loops
-				games_xml_list = gl.names()
+					# Update xml metadata
+					if (enable_data):
+						print("")
+						print("Updating gamelist.xml metadata")
+						if (game['has_xml']):
+							# Find and edit existing entry
+							if (enable_overwrite):
+								print("- Updating existing gamelist.xml entry")
+							else:
+								print("- Updating existing gamelist.xml entry (missing fields only)")
+							gl.update_game(game, enable_overwrite)
+						else:
+							# Add new entry
+							print("- Creating new gamelist.xml entry")
+							gl.add_game(game, enable_overwrite)
+						
+						# Update the list of games with XML, in case we find a match in any
+						# subsequent loops
+						games_xml_list = gl.names()
+				else:
+					print("- Skipping, no data was retrieved")

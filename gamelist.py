@@ -14,10 +14,17 @@ from xml.dom import minidom
 class Gamelist():
 	
 	def __init__(self, xml_path = ""):
+		print("Gamelist initialising for XML functions")
 		self.xml_path = xml_path
 		self.is_parsed = False
 		if os.path.isfile(self.xml_path):
-			pass
+			try:
+				tmp_tree = etree.parse(self.xml_path)
+				self.is_parsed = True
+				print("- Successfully opened %s" % self.xml_path)
+			except Exception as e:
+				print("- Error, unable to parse %s, may be invalid XML" % self.xml_path)
+				print(e)
 		else:
 			self.init_xml()
 	
@@ -89,7 +96,7 @@ class Gamelist():
 			path_el.text = "./" + game['path']
 			game_element.append(path_el)
 			
-			process_fields = ['name', 'desc', 'rating', 'date', 'developer', 'publisher', 'genre', 'players']
+			process_fields = ['name', 'desc', 'rating', 'releasedate', 'developer', 'publisher', 'genre', 'players']
 			for k in process_fields:
 				if game[k]:
 					el = etree.Element(k)
@@ -102,13 +109,15 @@ class Gamelist():
 			
 			# Close xml
 			if updated:
-				tree_string = etree.tostring(root, encoding="unicode")
-				reparsed = minidom.parseString(tree_string)
-				f = open(self.xml_path, "w")
-				f.write(tree_string)
-				f.write("\n")
-				f.close()
-	
+				#tree_string = etree.tostring(root, encoding="unicode")
+				tree.write(self.xml_path + "-tmp")	
+				try:
+					tmp_tree = etree.parse(self.xml_path + "-tmp")
+					tree.write(self.xml_path)
+				except Exception as e:
+					print("- Error reparsing updated XML for new game, it has not been saved")
+					print(e)
+
 	def update_game(self, game, enable_overwrite = False):
 		""" Amend an existing game in the xml file """
 		
@@ -128,11 +137,11 @@ class Gamelist():
 					# Change attributes
 					if enable_overwrite:
 						# Update all fields
-						process_fields = ['name', 'desc', 'rating', 'date', 'developer', 'publisher', 'genre', 'players']
+						process_fields = ['name', 'desc', 'rating', 'releasedate', 'developer', 'publisher', 'genre', 'players']
 					else:
 						# Find only missing/empty fields
 						process_fields = []
-						for f in ['name', 'desc', 'rating', 'date', 'developer', 'publisher', 'genre', 'players']:
+						for f in ['name', 'desc', 'rating', 'releasedate', 'developer', 'publisher', 'genre', 'players']:
 							element_field = game_element.find(f)
 							if (element_field is None):
 								process_fields.append(f)
@@ -151,9 +160,11 @@ class Gamelist():
 						
 			# Close xml
 			if updated:
-				tree_string = etree.tostring(root, encoding="unicode")
-				reparsed = minidom.parseString(tree_string)
-				f = open(self.xml_path, "w")
-				f.write(tree_string)
-				f.write("\n")
-				f.close()
+				#tree_string = etree.tostring(root, encoding="unicode")
+				tree.write(self.xml_path + "-tmp")
+				try:
+					tmp_tree = etree.parse(self.xml_path + "-tmp")
+					tree.write(self.xml_path)
+				except Exception as e:
+					print("- Error reparsing updated XML for edited game, it has not been saved")
+					print(e)
