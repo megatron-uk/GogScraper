@@ -11,16 +11,29 @@ This tool is intended to retrieve full information about games which have been b
 Currently supports the following features
 
    * Can search for games in **GOG.com or the Steam store** using the shortcuts in your EmulationStation folder (either Windows **.lnk** or Linux **.desktop** format)
-   * Multiple results prompt for user to select the correct game; exact matches are auto selected.
+   * Multiple search results will prompt the user to select the correct game; exact matches are auto selected.
 
    * From a matching game page on GOG.com, the following can be retrieved automatically:
       * Game **metadata** is downloaded (title, developer, publisher, release date, rating, genre).
       * Game **artwork** is downloaded (marquee image, cover art, screenshot).
-      * Game **video** is downloaded (YouTube based linked videos only).
+        * Screenshots use the *first* of the listed images under 'screenshots'
+        * Covers use the 'boxArtImage' image
+        * Marquees use the 'logo' image
+      * Game **video** is downloaded.
+        * Uses the *first* listed video under 'videos'
+        * Defaults to 480P, then 720P, then 360P resolution
+        * YouTube based linked videos only
+      
    * From a matching game in the Steam app data, the following can be retrieved automatically:
       * Game **metadata** is downloaded (title, developer, publisher, release date, rating, genre).
       * Game **artwork** is downloaded (marquee image, cover art, screenshot).
+        * Screenshots use the *first* of the listed images under 'screenshots'
+        * Covers use the 'header_image' image
+        * Marquees use the 'capsule_image' image
       * Game **video** is downloaded (mp4 versions only).
+        * Uses the *first* listed video under 'movies'
+        * Defaults to 480P resolution
+        * Defaults to MP4 containers 
 
    * Gamelist.xml is updated automatically with new entries *or* updated metadata for each game.
 
