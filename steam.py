@@ -69,8 +69,7 @@ class Steam():
 		
 		# Get steam app id's list
 		try:
-			print("")
-			print("Retriving Steam App entries from steampowered.com")
+			print("- Retriving Steam App entries from steampowered.com")
 			r = requests.get(SEARCH_URL, cookies = cookies)
 			if (r.status_code != 200):
 				print("- Skipped, no data returned %s" % (r.status_code))

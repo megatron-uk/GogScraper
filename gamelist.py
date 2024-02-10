@@ -14,7 +14,7 @@ from xml.dom import minidom
 class Gamelist():
 	
 	def __init__(self, xml_path = ""):
-		print("Gamelist initialising for XML functions")
+		print("- Gamelist initialising for XML functions")
 		self.xml_path = xml_path
 		self.is_parsed = False
 		if os.path.isfile(self.xml_path):

@@ -28,7 +28,6 @@ def get_roms_list(path = ""):
 	
 	games = []
 	
-	print("")
 	print("Getting game names from %s:" % path)
 	
 	files = os.listdir(path)
@@ -101,29 +100,16 @@ if __name__ == "__main__":
 	print("Scraper running...")
 
 	parser = argparse.ArgumentParser(description='Scrape media and metadata for games in an EmulationStation folder.', add_help = True)
-	
-	# Flag to enable metadata download/setting
 	parser.add_argument('-d', '--enable-data', dest='enable_data', action='store_true', help='Enable text metadata downloading')
-	
-	# Enable artwork downloading
 	parser.add_argument('-a', '--enable-art', dest='enable_art', action='store_true', help='Enable artwork (screens, titles, marquee, covers) image downloading')
-	
-	# Enable video downloading
-	parser.add_argument('-v', '--enable-video', dest='enable_video', action='store_true', help='Enable video downloading (Youtube only)')
-
-	# Enable data/media over-writing
+	parser.add_argument('-v', '--enable-video', dest='enable_video', action='store_true', help='Enable video downloading')
 	parser.add_argument('-f', '--force', dest='enable_overwrite', action='store_true', help='Force overwrite of any existing artwork, video or metadata for each game')
-
-	# Name of folder to process
 	parser.add_argument('--roms', dest='rom_path', action='store', required=True, help='Set the path to the folder of games you want to process')
-
-	# Path to gamelist
 	parser.add_argument('--xml', dest='xml_path', action='store', required=True, help='Set the full path and filename of the gamelist.xml you wish to process')
-	
-	# Path to downloaded media directory
 	parser.add_argument('--media', dest='download_path', action='store', required=True, help='Set the path to store downloaded media')
-	
 	parser.add_argument('--provider', dest='provider', action='store', required=True, help='Set the data provider to "gog" or "steam"')
+	parser.add_argument('--start-from', dest='start_from', action='store', required=False, help='Ignore all titles that start before this letter (use to skip initial games in a partially scraped --roms folder)')
+	parser.add_argument('--rom', dest='rom', action='store', required=False, help='Ignore all other titles found and process this rom filename only (use to process only one game in the --roms folder). File extension not required.')
 	
 	args = parser.parse_args()
 	args_dict = vars(args)
@@ -135,9 +121,12 @@ if __name__ == "__main__":
 	rom_path = args_dict['rom_path']
 	xml_path = args_dict['xml_path']
 	download_path = args_dict['download_path']
+	start_from = args_dict['start_from']
+	rom_name = args_dict['rom']
 	
 	print("")
 	print("Selected options: [data: %s] [art: %s] [video: %s] [overwrite: %s]" % (enable_data, enable_art, enable_video, enable_overwrite))
+	print("Additional options: [start_from: %s] [rom: %s]" % (start_from, rom_name))
 	print("Data provider: %s" % provider)
 	print("ROM path: %s" % rom_path)
 	print("XML path: %s" % xml_path)
@@ -146,22 +135,28 @@ if __name__ == "__main__":
 	if provider.upper() not in ["GOG", "STEAM"]:
 		exit_abnormal(1, "You must set the provider to be either 'gog' or 'steam'")
 	
+	print("")
+	print("Loading data provider")
 	if provider.upper() == "GOG":
 		p = GProvider(debug = False)
 		if p is False:
 			exit_abnormal(1, "The GOG.com provider could not be initialised.")
+		else:
+			print("- GOG.com data provider initialised")
 		MEDIA = GMEDIA
 	if provider.upper() == "STEAM":
 		p = SProvider(debug = False)
 		if p is False:
 			exit_abnormal(1, "The Steam provider could not be initialised.")
+		else:
+			print("- Steam data provider initialised")
 		MEDIA = SMEDIA
 	
 	# Get a list of all games/roms in the rom folder
 	games_list = get_roms_list(rom_path)
+	games_list.sort()
 	
 	# Get a list of all games/roms in the xml file
-	print("")
 	print("Getting game names from gamelist.xml %s:" % xml_path)
 	gl = Gamelist(xml_path)
 	if gl is False:
@@ -170,14 +165,23 @@ if __name__ == "__main__":
 		games_xml_list = gl.names()
 		print("- Found [%d] " % len(games_xml_list))
 	
-	# Default is to search for games with no metadata
-	#games_missing_data = []
-	
-	# We can also search for games with no artwork
-	#games_missing_art = []
-	
-	# Or we can just search for games with no video
-	#games_missing_video = []
+	# Are we skipping a partially complete set of titles?
+	if start_from:
+		print("Filtering initial game names, starting at [%s]" % start_from)
+		new_games_list = []
+		for g in games_list:
+			if g[0].upper() < start_from.upper():
+				pass
+			else:
+				new_games_list.append(g)
+		games_list = new_games_list
+		print("- Filtered to [%d]" % len(games_list))
+		
+	# Are we looking for a single rom name?
+	if rom_name:
+		print("Looking for a single filename only")
+		print("- Rom name [%s]" % rom_name)
+		games_list = [rom_name]
 	
 	# We search using the filename, stripped of any suffix
 	for g in games_list:	
