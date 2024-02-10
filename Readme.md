@@ -36,6 +36,8 @@ Currently supports the following features
         * Defaults to MP4 containers 
 
    * Gamelist.xml is updated automatically with new entries *or* updated metadata for each game.
+   * Can skip to a given letter in a directory of partially scraped games (i.e. start at 'S').
+   * Can scrape a single named game in a directory of partially scraped games.
 
 ---
 
@@ -92,23 +94,29 @@ $
 You can use the **-h** (help) flag to show more details:
 
 ```
-$ python3 scrape.py -h
+$ python3 scrape.py --h
 Scraper running...
 usage: scrape.py [-h] [-d] [-a] [-v] [-f] --roms ROM_PATH --xml XML_PATH --media DOWNLOAD_PATH
+                 --provider PROVIDER [--start-from START_FROM] [--rom ROM]
 
 Scrape media and metadata for games in an EmulationStation folder.
 
 options:
   -h, --help            show this help message and exit
-  -d, --enable-data     Enable text metadata downloading & extraction
+  -d, --enable-data     Enable text metadata downloading
   -a, --enable-art      Enable artwork (screens, titles, marquee, covers) image downloading
-  -v, --enable-video    Enable video downloading (Youtube only)
+  -v, --enable-video    Enable video downloading
   -f, --force           Force overwrite of any existing artwork, video or metadata for each game
-  --roms ROM_PATH       Set the path to the folder of games/links/shortcuts you want to process
+  --roms ROM_PATH       Set the path to the folder of games you want to process
   --xml XML_PATH        Set the full path and filename of the gamelist.xml you wish to process
   --media DOWNLOAD_PATH
                         Set the path to store downloaded media
   --provider PROVIDER   Set the data provider to "gog" or "steam"
+  --start-from START_FROM
+                        Ignore all titles that start before this letter (use to skip initial games
+                        in a partially scraped --roms folder)
+  --rom ROM             Ignore all other titles found and process this rom filename only (use to
+                        process only one game in the --roms folder). File extension not required.
 ```
 
 *Note: If you do not already have a gamelist.xml file for your desktop game collection, this tool will generate one for you, to the EmulationStation specification, based on the results it finds.*
