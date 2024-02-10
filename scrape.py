@@ -181,7 +181,12 @@ if __name__ == "__main__":
 	if rom_name:
 		print("Looking for a single filename only")
 		print("- Rom name [%s]" % rom_name)
-		games_list = [rom_name]
+		new_games_list = []
+		# Only use rom name if it matches a file we found in the directory
+		for g in games_list:
+			if g == rom_name:
+				games_list = [rom_name]
+		games_list = new_games_list
 	
 	# We search using the filename, stripped of any suffix
 	for g in games_list:	

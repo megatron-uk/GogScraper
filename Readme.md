@@ -116,7 +116,7 @@ options:
                         Ignore all titles that start before this letter (use to skip initial games
                         in a partially scraped --roms folder)
   --rom ROM             Ignore all other titles found and process this rom filename only (use to
-                        process only one game in the --roms folder). File extension not required.
+                        process only one game in the --roms folder). File extension IS required.
 ```
 
 *Note: If you do not already have a gamelist.xml file for your desktop game collection, this tool will generate one for you, to the EmulationStation specification, based on the results it finds.*
